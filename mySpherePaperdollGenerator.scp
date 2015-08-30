@@ -1,0 +1,133 @@
+[comment My_Sphere]
+[quote][b][size=2]MyRunUo Php Script -- Sphere Server Entegration -- Rescripted by Avatar [/b][/size]
+
+[b]Link for Php Script ==>[/b]  http://crowskingdom.bizhat.com/MyRunUO-PHP-1.01/
+Mysql (Sql) file is on web page i linked.
+
+[b]Example : [/b]www.tns.gen.tr/Player_Database/player.php?id=41014
+
+System operation analogy was taken from RunUo C# script and adjusted for SphereServer
+
+[b]Requirements[/b] : Mysql Server, Apache Server - Php or Remote Connection ( whatever you wish )
+[b]Fundamentals for developing the content :[/b]  Php Knowledge, Mysql Knowledge
+
+Just change the myrunuo.inc.php files according to your information such as db username, password, server or so.
+Also, it is important that you should create uofiles folder and put required mul files in it like the following ;
+
+http://tns.gen.tr/Player_Database/uofiles/
+
+This is not a full functioning script just a simple example of how to create Paperdoll on Web Page.
+
+You can adjust it in several ways like player's statistics, online player, events that you created , etc. 
+
+I put one of the example of paperdoll that is functioning in my shard. You can see there.
+
+Mainly items id is operated in php script according to decimal value. Therefore you should change id value to decimal.
+
+Like for 0x23443 , make it in script like <eval <0x23443>>. Actually there is no "X" in our sphereserver. For colors, change them decimal too. Like 0234 
+
+==> <eval <0234>>, so and so forth..
+
+
+[function f_set_mysphere_web] // You can put it on login or operate it with timer on item , whatever you like.
+
+serv.MySqlDatabase=mysphere // I prefer to use my data seperately since sometimes is diffucult to maintain all of them in same database.Yet, you can neglect this part or change accordingly.
+
+db.connect
+db.execute delete from myrunuo_characters where char_id='<eval <uid>>' // Each time players want to see their paperdoll, data belong to player should be removed and replaced by the new one.
+
+// Instead of deleting you can also update the content belong to uid like db.query update to related char_str,dex,guild so and so forth. But i would say that it is not convenient.
+
+db.query insert into myrunuo_characters (char_id, char_name, char_str, char_dex, char_int, char_female, char_counts, char_guild, char_guildtitle, char_nototitle, char_bodyhue, char_public) VALUES ('<eval <uid>>', '<addslashes <name>>', '<str>', '<dex>', '<int>', '<sex>', null, '<guild>', null, '<title>', '<eval <color>>', null) // Character Informations, you can adjust if there is missing part.
+
+
+db.execute delete from myrunuo_characters_layers where char_id='<eval <uid>>' // Removing layers to replace again in order not to duplicate.
+
+// Inserting data of layers from <src>
+for x 1 24
+	if <findlayer.<dlocal.x>>
+		ref1 = <findlayer.<dlocal.x>.uid>
+		db.query insert into myrunuo_characters_layers (char_id, layer_id, item_id, item_hue) VALUES ('<eval <ref1.cont.uid>>','<dlocal.x>','<eval <ref1.id>>','<eval <ref1.color>>') //
+	endif
+endfor
+// Character skills
+for x 1 49
+db.query insert into myrunuo_characters_skills (char_id, skill_id, skill_value) VALUES ('<eval <uid>>','<dlocal.x>','<<def.player_skill_<dlocal.x>>')
+endfor
+
+db.close
+serv.MySqlDatabase=sphere // Changing default mysql database set in sphere.ini in order not to cause any problems.
+
+[function addslashes]
+local.str=<asc <args>>
+local.string=s
+for i 0 strlen(<local.str>)
+    local.check=<strarg <local.str>>
+    local.last=<local.check>
+    if (<local.check> == 00)
+        return <strsub 1 <eval strlen(<local.string>)-2> <local.string>>
+    endif
+    if (<local.check>=<asc \>)
+        local.last=<asc \>
+        local.string <strsub 0 <eval strlen(<local.string>)-1> <local.string>>\\s
+    elif (<local.check>=<asc '>)
+        local.string <strsub 0 <eval strlen(<local.string>)-1> <local.string>>\'s
+    else
+        local.string <strsub 0 <eval strlen(<local.string>)-1> <local.string>><chr <local.check>>s
+    endif
+    local.str=<streat <local.str>>
+endfor
+return <strsub 1 <eval strlen(<local.string>)-2> <local.string>>
+
+//// DEFNAME //
+[defname player_skilldown]
+player_skill_1 Alchemy
+player_skill_2 Anatomy
+player_skill_3 AnimalLore
+player_skill_4 Taming
+player_skill_5 Archery
+player_skill_6 ArmsLore
+player_skill_7 Begging
+player_skill_8 Blacksmithing
+player_skill_9 Bowcraft
+player_skill_10 Camping
+player_skill_11 Carpentry
+player_skill_12 Cartography
+player_skill_13 Cooking
+player_skill_14 DetectingHidden
+player_skill_15 Enticement
+player_skill_16 EvaluatingIntel
+player_skill_17 Fencing
+player_skill_18 Fishing
+player_skill_19 Forensics
+player_skill_20 Healing
+player_skill_21 Herding
+player_skill_22 Hiding
+player_skill_23 Inscription
+player_skill_24 ItemId
+player_skill_25 Lockpicking
+player_skill_26 Lumberjacking
+player_skill_27 MaceFighting
+player_skill_28 Magery
+player_skill_29 Meditation
+player_skill_30 Mining
+player_skill_31 Musicianship
+player_skill_32 Parrying
+player_skill_33 Peacemaking
+player_skill_34 Poisoning
+player_skill_35 Provocation
+player_skill_36 RemoveTrap
+player_skill_37 MagicResistance
+player_skill_38 Snooping
+player_skill_39 SpiritSpeak
+player_skill_40 Stealing
+player_skill_41 Stealth
+player_skill_42 Swordsmanship
+player_skill_43 Tactics
+player_skill_44 Tailoring
+player_skill_45 TasteId
+player_skill_46 Tinkering
+player_skill_47 Tracking
+player_skill_48 Veterinary
+player_skill_49 Wrestling
+
